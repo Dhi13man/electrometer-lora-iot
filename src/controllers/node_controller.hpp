@@ -70,6 +70,7 @@ class NodeController : public BaseController {
          * 
          */
         void operate() {
+            // Sense needed values
             unsigned long last = millis();
             double cSum = 0, vSum = 0, count = 0;
             while (int(millis() - last) < 5000) {
@@ -78,12 +79,14 @@ class NodeController : public BaseController {
                 count += 1;
                 delay(200);
             }
+            // For Serializable Data
             SerializableData dataList[] = {
                 SerializableData("deviceID", nodeID),
                 SerializableData("current", String(cSum / count)),
-                SerializableData("voltage", String(vSum / count))
+                SerializableData("voltage", String(vSum / count)),
             };
-            const LoraDTO dto = LoraDTO(dataList, 3);
+            // Send LoRA Message
+            LoraDTO dto = LoraDTO(dataList, 3);
             loraInterface->sendLoraMessage(dto);
         }
 

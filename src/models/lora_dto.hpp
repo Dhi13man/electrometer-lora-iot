@@ -99,13 +99,4 @@ class LoraDTO {
             }
             return serializedData;
         }
-
-        /**
-         * @brief Destroy the Lora Response object
-         * 
-         */
-        ~LoraDTO() {
-            delete[] this->dataList;
-            this->dataList = nullptr;
-        }
 };

@@ -23,7 +23,7 @@ enum ControlModes {
 };
 
 // Define Control Mode
-const ControlModes controlMode = ControlModes::GATEWAY;
+const ControlModes controlMode = ControlModes::NODE;
 
 // Wi-Fi Details
 // const char* wifiSSID = "Elements 2.4Ghz";

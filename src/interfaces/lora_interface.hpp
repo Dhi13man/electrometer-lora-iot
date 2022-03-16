@@ -45,7 +45,6 @@ class LoraInterface {
             this->logger->logSerial("Sending LoRa Message", true);
             // Serialize the data list
             String serializedData = loraDTO.toString();
-            // TODO: Send message over LoRA
         }
 
         /**
