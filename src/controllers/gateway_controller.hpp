@@ -1,0 +1,90 @@
+/**
+ * @file gateway_controller.hpp
+ * @author dhi13man (https://www.github.com/dhi13man/)
+ * @brief Contains the LoRA Gateway controller logic.
+ * @version 0.1
+ * @date 2022-03-16
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
+
+#include "controllers/base_controller.hpp"
+#include "interfaces/rest_client.hpp"
+#include "interfaces/lora_interface.hpp"
+#include "interfaces/wifi_handler.hpp"
+#include "models/lora_dto.hpp"
+#include "models/serializable_data.hpp"
+#include "services/logger.hpp"
+
+/**
+ * @brief The control logic for the microcontroller's operation as a Gateway.
+ * 
+ */
+class GatewayController : public BaseController {
+    private:
+        /// The REST Client to make requests to the endpoint with.
+        RESTClient *restClient;
+
+        /// The Client used to make HTTP requests.
+        WiFiHandler *wifi;
+
+        /// The interface to use for LoRa Communication (receiving)
+        LoraInterface *loraInterface;
+    
+    public:
+        /**
+         * @brief Construct a new Gateway Controller object
+         * 
+         * @param wifiSSID The SSID of the Wi-Fi that the Gateway will connect to.
+         * @param wifiPassword The password of the Wi-Fi that the Gateway will connect to.
+         * @param restHost The base URL of the REST backend to send requests to.
+         * @param verbose Whether or not to log the Gatway Controller activities.
+         * @param wifiVerbose Whether or not to log the WiFiHandler activities.
+         * @param restVerbose Whether or not to log the RESTClient activities.
+         * @param loraInterfaceVerbose Whether or not to log the LoraInterface activities.
+         */
+        GatewayController(
+            const char *wifiSSID,
+            const char *wifiPassword,
+            const char *restHost,
+            const bool verbose = false,
+            const bool wifiVerbose = false,
+            const bool restVerbose = false,
+            const bool loraInterfaceVerbose = false
+        ) : BaseController(new Logger(verbose, "GatewayController")) {
+            // Set up Wi-Fi Connection.
+            this->wifi = new WiFiHandler(wifiSSID, wifiPassword, wifiVerbose);
+            this->wifi->connectWiFi();
+            this->logger->logSerial(wifi->getIP(), true);
+
+            // Set up the REST Client.
+            this->restClient = new RESTClient(restHost, wifi, restVerbose);
+
+            // Set up LoRa interface
+            this->loraInterface = new LoraInterface(loraInterfaceVerbose);
+        }
+
+        /**
+         * @brief The main operation logic for the microcontroller running as Gateway.
+         * 
+         */
+        void operate() override {
+            const char* dataSendPath = "/.netlify/functions/server";
+            LoraDTO dto = loraInterface->receiveLoraMessage("deviceID=QB5ckYt0CS7Yc7swMKPu&current=0.01&voltage=230.00");
+            restClient->makeGETRequest(dataSendPath, dto.getDataList(), dto.getDataListSize());
+        }
+
+        /**
+         * @brief Destroy the Gateway Controller object
+         * 
+         */
+        ~GatewayController() {
+            delete this->restClient;
+            this->restClient = nullptr;
+            delete this->wifi;
+            this->wifi = nullptr;
+            delete this->loraInterface;
+            this->loraInterface = nullptr;
+        }
+};
