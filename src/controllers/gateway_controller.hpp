@@ -13,6 +13,7 @@
 #include "interfaces/rest_client.hpp"
 #include "interfaces/lora_interface.hpp"
 #include "interfaces/wifi_handler.hpp"
+#include "models/enums.hpp"
 #include "models/lora_dto.hpp"
 #include "models/serializable_data.hpp"
 #include "services/logger.hpp"
@@ -39,6 +40,7 @@ class GatewayController : public BaseController {
          * @param wifiSSID The SSID of the Wi-Fi that the Gateway will connect to.
          * @param wifiPassword The password of the Wi-Fi that the Gateway will connect to.
          * @param restHost The base URL of the REST backend to send requests to.
+         * @param loraBand The frequency band to be used for LoRA Communication.
          * @param verbose Whether or not to log the Gatway Controller activities.
          * @param wifiVerbose Whether or not to log the WiFiHandler activities.
          * @param restVerbose Whether or not to log the RESTClient activities.
@@ -48,6 +50,7 @@ class GatewayController : public BaseController {
             const char *wifiSSID,
             const char *wifiPassword,
             const char *restHost,
+            const LoraBand loraBand = LoraBand::ASIA,
             const bool verbose = false,
             const bool wifiVerbose = false,
             const bool restVerbose = false,
@@ -62,7 +65,7 @@ class GatewayController : public BaseController {
             this->restClient = new RESTClient(restHost, wifi, restVerbose);
 
             // Set up LoRa interface
-            this->loraInterface = new LoraInterface(loraInterfaceVerbose);
+            this->loraInterface = new LoraInterface(loraBand, loraInterfaceVerbose);
         }
 
         /**
@@ -71,7 +74,7 @@ class GatewayController : public BaseController {
          */
         void operate() override {
             const char* dataSendPath = "/.netlify/functions/server";
-            LoraDTO dto = loraInterface->receiveLoraMessage("deviceID=QB5ckYt0CS7Yc7swMKPu&current=0.01&voltage=230.00");
+            LoraDTO dto = loraInterface->receiveLoraMessage();
             restClient->makeGETRequest(dataSendPath, dto.getDataList(), dto.getDataListSize());
         }
 

@@ -12,6 +12,7 @@
 #include "controllers/base_controller.hpp"
 #include "interfaces/lora_interface.hpp"
 #include "interfaces/sensor_interfaces.hpp"
+#include "models/enums.hpp"
 #include "models/lora_dto.hpp"
 #include "services/logger.hpp"
 
@@ -40,6 +41,7 @@ class NodeController : public BaseController {
          * @param nodeID The Device ID of the node.
          * @param currentSensorPin The pin that the current sensor is connected to.
          * @param voltageSensorPin The pin that the voltage sensor is connected to.
+         * @param loraBand The frequency band to be used for LoRA Communication.
          * @param verbose Whether or not to log the Gatway Controller activities.
          * @param currentSensorVerbose Whether or not to log the CurrentSensorInterface activities.
          * @param voltageSensorVerbose Whether or not to log the VoltageSensorInterface activities.
@@ -49,6 +51,7 @@ class NodeController : public BaseController {
             const String nodeID,
             const uint8_t currentSensorPin,
             const uint8_t voltageSensorPin,
+            const LoraBand loraBand = LoraBand::ASIA,
             const bool verbose = false,
             const bool currentSensorVerbose = false,
             const bool voltageSensorVerbose = false,
@@ -62,7 +65,7 @@ class NodeController : public BaseController {
             this->voltageSensor = new VoltageSensorInterface(voltageSensorPin, voltageSensorVerbose);
 
             // Set up LoRa interface
-            this->loraInterface = new LoraInterface(loraInterfaceVerbose);
+            this->loraInterface = new LoraInterface(loraBand, loraInterfaceVerbose);
         }
 
         /**

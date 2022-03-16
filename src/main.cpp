@@ -14,13 +14,10 @@
 #include "controllers/base_controller.hpp"
 #include "controllers/gateway_controller.hpp"
 #include "controllers/node_controller.hpp"
+#include "models/enums.hpp"
 
-/// The Control Mode types available to be used by the Robot.
-enum ControlModes {
-    NODE,
-    GATEWAY,
-    TEST
-};
+// Define Frequency Band
+const LoraBand loraBand = LoraBand::ASIA;
 
 // Define Control Mode
 const ControlModes controlMode = ControlModes::NODE;
@@ -44,10 +41,10 @@ void setup() {
 
   switch (controlMode) {
     case ControlModes::NODE:
-      controller = new NodeController(deviceID, 36, 37, true, false, false, true);
+      controller = new NodeController(deviceID, 36, 37, loraBand, true, false, false, true);
       break;
     case ControlModes::GATEWAY:
-      controller = new GatewayController(wifiSSID, wifiPassword, host, true, true, true, true);
+      controller = new GatewayController(wifiSSID, wifiPassword, host, loraBand, true, true, true, true);
       break;
   }
 }
