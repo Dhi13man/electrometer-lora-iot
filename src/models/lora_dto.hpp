@@ -50,10 +50,10 @@ class LoraDTO {
             for (int i = 0; i < data.length(); i++) {
                 amps += data.charAt(i) == '&';
             }
-            SerializableData dataList[2 * amps];
+            SerializableData *dataList = new SerializableData[amps + 1];
             int dataListSize = 0;
             int index = 0;
-            while (index < data.length()) {
+            while ((index < data.length()) && (dataListSize < amps + 1)) {
                 int keyEndIndex = data.indexOf("=", index);
                 String key = data.substring(index, keyEndIndex);
                 index = keyEndIndex + 1;

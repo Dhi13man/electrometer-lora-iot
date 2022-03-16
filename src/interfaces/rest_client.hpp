@@ -40,12 +40,12 @@ class RESTClient {
          */
         String formGetRequestURL(
             const String urlEndpoint,
-            SerializableData data[],
+            SerializableData *data,
             const int dataLength
         ) {
             String encodedURL = urlEndpoint + "?";
             for (int i = 0; i < dataLength; i++) {
-                encodedURL += data[i].getKey() + String("=") + data[i].getVal();
+                encodedURL += data[i].toString();
                 if (i != dataLength - 1) {
                     encodedURL += "&";
                 }
@@ -79,9 +79,10 @@ class RESTClient {
          */
         size_t makeGETRequest(
             const String urlEndpoint,
-            SerializableData data[],
+            SerializableData *data,
             const int dataLength
         ) {
+            logger->logSerial("Sending GET request...");
             const String encodedURL = formGetRequestURL(urlEndpoint, data, dataLength);
             const bool con = wifi->connectClient(host);
             if (wifi->getStatus() == WL_CONNECTED && con) {
