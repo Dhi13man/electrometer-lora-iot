@@ -93,6 +93,7 @@ class RESTClient {
                     "Connection: close\r\n\r\n"
                 );
                 logger->logSerial("Sent!", true);
+                logger->logOLED("Uploaded " + String(res) + " bytes.");
                 return res;
             } else {
                 logger->logSerial("Connection failed! Reconnecting...", true);

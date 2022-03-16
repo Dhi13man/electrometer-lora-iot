@@ -32,27 +32,6 @@ class LoraInterface {
         /// The frequency band to be used for LoRA Communication.
         int band;
 
-        //Initialize LoRa module
-        void startLoRA() {
-            //SPI LoRa pins
-            SPI.begin(SCK, MISO, MOSI, SS);
-            //setup LoRa transceiver module
-            LoRa.setPins(SS, RST, DIO0);
-
-            int counter = 0;
-            while (!LoRa.begin(band, false) && counter < 10) {
-                Serial.print(".");
-                counter++;
-                delay(500);
-            }
-            if (counter == 10) {
-                logger->logSerial("Starting LoRa failed!", true); 
-            } else {
-                logger->logSerial("LoRa Initialization OK!", true);
-                LoRa.setSyncWord(0xF3);
-            }
-        }
-
     public:
         /**
          * @brief Construct a new LoRa Interface object.
@@ -77,9 +56,8 @@ class LoraInterface {
             }
 
             // Initialize LoRa
-            Heltec.begin(true, true, verbose , true, this->band);
+            LoRa.begin(this->band, true);
 	        LoRa.setTxPower(14, RF_PACONFIG_PASELECT_PABOOST);
-            // this->startLoRA();
         }
 
         /**
@@ -95,6 +73,9 @@ class LoraInterface {
             LoRa.beginPacket();
             LoRa.print(serializedData);
             LoRa.endPacket();
+            this->logger->logOLED("Sent " + String(serializedData.length()) + " bytes.");
+            delay(500);
+            this->logger->logOLED("Sent 0 bytes.");
         }
 
         /**
@@ -111,6 +92,7 @@ class LoraInterface {
             } else {
                 this->logger->logSerial("Nothing received!", true);
             }
+            this->logger->logOLED("Received " + String(parsed) + " bytes.");
             // Deserialize received message
             return LoraDTO::fromString(message);
         }

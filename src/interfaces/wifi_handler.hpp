@@ -60,6 +60,8 @@ class WiFiHandler {
                 logger->logSerial(".");
             }
             logger->logSerial("", true);
+            logger->logOLED("Connected to " + String(ssid));
+            delay(1000);
         }
 
         /**

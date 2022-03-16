@@ -10,6 +10,7 @@
  */
 
 #include<Arduino.h>
+#include<heltec.h>
 
 #include "controllers/base_controller.hpp"
 #include "controllers/gateway_controller.hpp"
@@ -25,8 +26,8 @@ const ControlModes controlMode = ControlModes::GATEWAY;
 // Wi-Fi Details
 // const char* wifiSSID = "Elements 2.4Ghz";
 // const char* wifiPassword = "enigma1302";
-const char* wifiSSID = "Omega_jio2";
-const char* wifiPassword = "55465858";
+const char* wifiSSID = "Tenda_4A3FB0";
+const char* wifiPassword = "M5LbgMTA";
 
 // REST Details
 const String deviceID = "QB5ckYt0CS7Yc7swMKPu";
@@ -38,6 +39,8 @@ BaseController *controller;
 void setup() {
   // Set up Logging.
   Serial.begin(115200);
+  /// OLED and LoRA Init
+  Heltec.begin(true, true, false , true);
 
   switch (controlMode) {
     case ControlModes::NODE:

@@ -12,6 +12,7 @@
 #pragma once
 
 #include<Arduino.h>
+#include<heltec.h>
 
 /**
  * @brief Used for logging across the microcontroller unit.
@@ -71,5 +72,17 @@ class Logger {
                         break;
                 }
             }
+        }
+
+        /**
+         * @brief Log into the display OLED if enabled and available
+         * 
+         */
+        void logOLED(String msg) {
+            Heltec.display->clear();
+            Heltec.display->setTextAlignment(TEXT_ALIGN_LEFT);
+            Heltec.display->setFont(ArialMT_Plain_10);
+            Heltec.display->drawStringMaxWidth(0 , 26 , 128, msg);
+            Heltec.display->display();
         }
 };
