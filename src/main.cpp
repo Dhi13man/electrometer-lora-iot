@@ -20,7 +20,7 @@
 const LoraBand loraBand = LoraBand::ASIA;
 
 // Define Control Mode
-const ControlModes controlMode = ControlModes::NODE;
+const ControlModes controlMode = ControlModes::GATEWAY;
 
 // Wi-Fi Details
 // const char* wifiSSID = "Elements 2.4Ghz";
@@ -41,10 +41,10 @@ void setup() {
 
   switch (controlMode) {
     case ControlModes::NODE:
-      controller = new NodeController(deviceID, 36, 37, loraBand, true, false, false, true);
+      controller = new NodeController(deviceID, 36, 37, loraBand, false, false, false, false);
       break;
     case ControlModes::GATEWAY:
-      controller = new GatewayController(wifiSSID, wifiPassword, host, loraBand, true, true, true, true);
+      controller = new GatewayController(wifiSSID, wifiPassword, host, loraBand, false, false, false, false);
       break;
   }
 }

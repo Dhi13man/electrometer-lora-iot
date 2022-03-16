@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <LoRa.h>
+#include <heltec.h>
 
 #include "models/serializable_data.hpp"
 #include "models/enums.hpp"
@@ -40,16 +40,17 @@ class LoraInterface {
             LoRa.setPins(SS, RST, DIO0);
 
             int counter = 0;
-            while (!LoRa.begin(band) && counter < 10) {
+            while (!LoRa.begin(band, false) && counter < 10) {
                 Serial.print(".");
                 counter++;
                 delay(500);
             }
             if (counter == 10) {
                 logger->logSerial("Starting LoRa failed!", true); 
+            } else {
+                logger->logSerial("LoRa Initialization OK!", true);
+                LoRa.setSyncWord(0xF3);
             }
-            logger->logSerial("LoRa Initialization OK!", true);
-            delay(2000);
         }
 
     public:
@@ -76,7 +77,9 @@ class LoraInterface {
             }
 
             // Initialize LoRa
-            this->startLoRA();
+            Heltec.begin(true, true, verbose , true, this->band);
+	        LoRa.setTxPower(14, RF_PACONFIG_PASELECT_PABOOST);
+            // this->startLoRA();
         }
 
         /**
@@ -100,6 +103,8 @@ class LoraInterface {
          * @return LoraDTO The received LoRa data.
          */
         LoraDTO receiveLoraMessage() {
+            int parsed = LoRa.parsePacket();
+            this->logger->logSerial(String(parsed), true);
             String message = LoRa.available() ? LoRa.readString() : "";
             if (message.length() > 0) {
                 this->logger->logSerial("Received LoRa Message: " + message, true);

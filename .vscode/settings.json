@@ -4,6 +4,14 @@
         "*.tcc": "cpp",
         "cmath": "cpp",
         "cstdio": "cpp",
-        "new": "cpp"
+        "new": "cpp",
+        "array": "cpp",
+        "deque": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "vector": "cpp",
+        "memory": "cpp",
+        "random": "cpp",
+        "initializer_list": "cpp"
     }
 }
