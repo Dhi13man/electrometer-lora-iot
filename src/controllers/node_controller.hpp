@@ -14,6 +14,7 @@
 #include "interfaces/sensor_interfaces.hpp"
 #include "models/enums.hpp"
 #include "models/lora_dto.hpp"
+#include "services/crypto.hpp"
 #include "services/logger.hpp"
 
 /**
@@ -33,6 +34,9 @@ class NodeController : public BaseController {
 
         /// The interface to use for LoRa Communication (sending)
         LoraInterface *loraInterface;
+
+        /// The encryption service
+        Crypto *cryptoService;
     
     public:
         /**
@@ -42,6 +46,7 @@ class NodeController : public BaseController {
          * @param currentSensorPin The pin that the current sensor is connected to.
          * @param voltageSensorPin The pin that the voltage sensor is connected to.
          * @param loraBand The frequency band to be used for LoRA Communication.
+         * @param encryptionKey The key to use for encryption of data in communication.
          * @param verbose Whether or not to log the Gatway Controller activities.
          * @param currentSensorVerbose Whether or not to log the CurrentSensorInterface activities.
          * @param voltageSensorVerbose Whether or not to log the VoltageSensorInterface activities.
@@ -51,13 +56,14 @@ class NodeController : public BaseController {
             const String nodeID,
             const uint8_t currentSensorPin,
             const uint8_t voltageSensorPin,
+            const char* encryptionKey,
             const LoraBand loraBand = LoraBand::ASIA,
             const bool verbose = false,
             const bool currentSensorVerbose = false,
             const bool voltageSensorVerbose = false,
             const bool loraInterfaceVerbose = false
         ) : BaseController(new Logger(verbose, "NodeController")) {
-            // Set up logging
+            // Set up device ID
             this->nodeID = nodeID;
 
             // Set up sensor interfaces
@@ -66,6 +72,9 @@ class NodeController : public BaseController {
 
             // Set up LoRa interface
             this->loraInterface = new LoraInterface(loraBand, loraInterfaceVerbose);
+
+            // Set up Encryption Service
+            this->cryptoService = new Crypto(encryptionKey);
         }
 
         /**
@@ -90,7 +99,7 @@ class NodeController : public BaseController {
             };
             // Send LoRA Message
             LoraDTO dto = LoraDTO(dataList, 3);
-            loraInterface->sendLoraMessage(dto);
+            loraInterface->sendLoraMessage(dto, cryptoService);
         }
 
         /**
@@ -104,5 +113,7 @@ class NodeController : public BaseController {
             this->voltageSensor = nullptr;
             delete this->loraInterface;
             this->loraInterface = nullptr;
+            delete this->cryptoService;
+            this->cryptoService = nullptr;
         }
 };

@@ -23,10 +23,11 @@ const LoraBand loraBand = LoraBand::ASIA;
 const ControlModes controlMode = ControlModes::GATEWAY;
 
 // Wi-Fi Details
-// const char* wifiSSID = "Elements 2.4Ghz";
-// const char* wifiPassword = "enigma1302";
 const char* wifiSSID = "Omega_jio2";
 const char* wifiPassword = "55465858";
+
+// Encryption Details
+const char* encryptionKey = "1234567890123456";
 
 // REST Details
 const String deviceID = "QB5ckYt0CS7Yc7swMKPu";
@@ -41,10 +42,30 @@ void setup() {
 
   switch (controlMode) {
     case ControlModes::NODE:
-      controller = new NodeController(deviceID, 36, 37, loraBand, false, false, false, false);
+      controller = new NodeController(
+        deviceID,
+        36,
+        37,
+        encryptionKey,
+        loraBand,
+        false,
+        false,
+        false,
+        false
+      );
       break;
     case ControlModes::GATEWAY:
-      controller = new GatewayController(wifiSSID, wifiPassword, host, loraBand, false, false, false, false);
+      controller = new GatewayController(
+        wifiSSID,
+        wifiPassword,
+        host,
+        encryptionKey,
+        loraBand,
+        false,
+        false,
+        false,
+        false
+      );
       break;
   }
 }
