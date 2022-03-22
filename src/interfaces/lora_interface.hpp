@@ -112,12 +112,13 @@ class LoraInterface {
             // Logging
             if (message.length() > 0) {
                 this->logger->logSerial("Received LoRa Message: " + message, true);
+                this->logger->logOLED("Received " + String(parsed) + " bytes: " + String(message));
+                // Deserialize received message
+                return LoraDTO::fromString(message);
             } else {
                 this->logger->logSerial("Nothing received!", true);
+                return LoraDTO(nullptr, 0);
             }
-            this->logger->logOLED("Received " + String(parsed) + " bytes: " + String(message));
-            // Deserialize received message
-            return LoraDTO::fromString(message);
         }
 
         /**

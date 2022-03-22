@@ -64,7 +64,6 @@ class GatewayController : public BaseController {
         ) : BaseController(new Logger(verbose, "GatewayController")) {
             // Set up Wi-Fi Connection.
             this->wifi = new WiFiHandler(wifiSSID, wifiPassword, wifiVerbose);
-            this->wifi->connectWiFi();
             this->logger->logSerial(wifi->getIP(), true);
 
             // Set up the REST Client.
@@ -75,6 +74,9 @@ class GatewayController : public BaseController {
 
             // Set up Encryption Service
             this->cryptoService = new Crypto(encryptionKey);
+            
+            // Connect to Wi-Fi
+            this->wifi->connectWiFi();
         }
 
         /**
@@ -82,9 +84,13 @@ class GatewayController : public BaseController {
          * 
          */
         void operate() override {
-            const char* dataSendPath = "/.netlify/functions/server";
             LoraDTO dto = loraInterface->receiveLoraMessage(cryptoService);
-            restClient->makeGETRequest(dataSendPath, dto.getDataList(), dto.getDataListSize());
+            if (dto.getDataListSize() == 0) {
+                logger->logSerial("Nothing to send!", true);
+            } else {
+                const char* dataSendPath = "/.netlify/functions/server";
+                restClient->makeGETRequest(dataSendPath, dto.getDataList(), dto.getDataListSize());
+            }
         }
 
         /**

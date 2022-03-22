@@ -84,16 +84,18 @@ class RESTClient {
         ) {
             logger->logSerial("Sending GET request...");
             const String encodedURL = formGetRequestURL(urlEndpoint, data, dataLength);
-            const bool con = wifi->connectClient(host);
-            if (wifi->getStatus() == WL_CONNECTED && con) {
+            if (wifi->getStatus() == WL_CONNECTED) {
                 // This will send the request to the server
                 size_t res = wifi->sendRequest(
+                    host,
                     "GET " + encodedURL + " HTTP/1.1\r\n" +
                     "Host: " + host + "\r\n" + 
                     "Connection: close\r\n\r\n"
                 );
-                logger->logSerial("Sent!", true);
-                logger->logOLED("Uploaded " + String(res) + " bytes.");
+                if (res != 0) {
+                    logger->logSerial("Sent!", true);
+                    logger->logOLED("Uploaded " + String(res) + " bytes.");
+                }
                 return res;
             } else {
                 logger->logSerial("Connection failed! Reconnecting...", true);
