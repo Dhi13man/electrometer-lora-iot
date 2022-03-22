@@ -55,7 +55,7 @@ class GatewayController : public BaseController {
             const char *wifiSSID,
             const char *wifiPassword,
             const char *restHost,
-            const char* encryptionKey,
+            const String encryptionKey,
             const LoraBand loraBand = LoraBand::ASIA,
             const bool verbose = false,
             const bool wifiVerbose = false,

@@ -56,7 +56,7 @@ class NodeController : public BaseController {
             const String nodeID,
             const uint8_t currentSensorPin,
             const uint8_t voltageSensorPin,
-            const char* encryptionKey,
+            const String encryptionKey,
             const LoraBand loraBand = LoraBand::ASIA,
             const bool verbose = false,
             const bool currentSensorVerbose = false,
@@ -82,6 +82,9 @@ class NodeController : public BaseController {
          * 
          */
         void operate() {
+            // String enc = cryptoService->encrypt("hehe sexy sex");
+            // String dec = cryptoService->decrypt(enc);
+            // Serial.println("enc: " + enc + "; dec: " + dec);
             // Sense needed values
             unsigned long last = millis();
             double cSum = 0, vSum = 0, count = 0;
