@@ -73,8 +73,8 @@ class LoraInterface {
             LoRa.beginPacket();
             LoRa.print(serializedData);
             LoRa.endPacket();
-            this->logger->logOLED("Sent " + String(serializedData.length()) + " bytes.");
-            delay(500);
+            this->logger->logOLED("Sent " + String(serializedData.length()) + " bytes" + String(serializedData));
+            delay(1000);
             this->logger->logOLED("Sent 0 bytes.");
         }
 
@@ -92,7 +92,7 @@ class LoraInterface {
             } else {
                 this->logger->logSerial("Nothing received!", true);
             }
-            this->logger->logOLED("Received " + String(parsed) + " bytes.");
+            this->logger->logOLED("Received " + String(parsed) + " bytes: " + String(message));
             // Deserialize received message
             return LoraDTO::fromString(message);
         }
