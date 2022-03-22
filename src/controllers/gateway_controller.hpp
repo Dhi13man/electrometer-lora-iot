@@ -16,6 +16,7 @@
 #include "models/enums.hpp"
 #include "models/lora_dto.hpp"
 #include "models/serializable_data.hpp"
+#include "services/crypto.hpp"
 #include "services/logger.hpp"
 
 /**
@@ -32,6 +33,9 @@ class GatewayController : public BaseController {
 
         /// The interface to use for LoRa Communication (receiving)
         LoraInterface *loraInterface;
+
+        /// The encryption service
+        Crypto *cryptoService;
     
     public:
         /**
@@ -40,6 +44,7 @@ class GatewayController : public BaseController {
          * @param wifiSSID The SSID of the Wi-Fi that the Gateway will connect to.
          * @param wifiPassword The password of the Wi-Fi that the Gateway will connect to.
          * @param restHost The base URL of the REST backend to send requests to.
+         * @param encryptionKey The key to use for encryption of data in communication.
          * @param loraBand The frequency band to be used for LoRA Communication.
          * @param verbose Whether or not to log the Gatway Controller activities.
          * @param wifiVerbose Whether or not to log the WiFiHandler activities.
@@ -50,6 +55,7 @@ class GatewayController : public BaseController {
             const char *wifiSSID,
             const char *wifiPassword,
             const char *restHost,
+            const char* encryptionKey,
             const LoraBand loraBand = LoraBand::ASIA,
             const bool verbose = false,
             const bool wifiVerbose = false,
@@ -66,6 +72,9 @@ class GatewayController : public BaseController {
 
             // Set up LoRa interface
             this->loraInterface = new LoraInterface(loraBand, loraInterfaceVerbose);
+
+            // Set up Encryption Service
+            this->cryptoService = new Crypto(encryptionKey);
         }
 
         /**
@@ -74,7 +83,7 @@ class GatewayController : public BaseController {
          */
         void operate() override {
             const char* dataSendPath = "/.netlify/functions/server";
-            LoraDTO dto = loraInterface->receiveLoraMessage();
+            LoraDTO dto = loraInterface->receiveLoraMessage(cryptoService);
             restClient->makeGETRequest(dataSendPath, dto.getDataList(), dto.getDataListSize());
         }
 
@@ -89,5 +98,7 @@ class GatewayController : public BaseController {
             this->wifi = nullptr;
             delete this->loraInterface;
             this->loraInterface = nullptr;
+            delete this->cryptoService;
+            this->cryptoService = nullptr;
         }
 };

@@ -16,6 +16,7 @@
 #include "models/serializable_data.hpp"
 #include "models/enums.hpp"
 #include "models/lora_dto.hpp"
+#include "services/crypto.hpp"
 #include "services/logger.hpp"
 
 #define RST 14
@@ -64,11 +65,21 @@ class LoraInterface {
          * @brief Send the LoRa Message.
          * 
          * @param loraDTO The LoRa DTO to send.
+         * @param cryptoService The encryption service to use. Will encrypt the message if
+         * not set to null.
          */
-        void sendLoraMessage(LoraDTO loraDTO) {
+        void sendLoraMessage(LoraDTO loraDTO, Crypto *cryptoService = nullptr) {
             this->logger->logSerial("Sending LoRa Message", true);
             // Serialize the data list
             String serializedData = loraDTO.toString();
+
+            // Encrypt if crypto service ready
+            if (cryptoService != nullptr && cryptoService->isReady()) {
+                serializedData = cryptoService->decrypt(serializedData);
+            } else {
+                this->logger->logSerial("Crypto Service not initialized!", true);
+            }
+
             //Send LoRa packet to receiver
             LoRa.beginPacket();
             LoRa.print(serializedData);
@@ -81,12 +92,24 @@ class LoraInterface {
         /**
          * @brief Receive the LoRa Message.
          * 
+         * @param cryptoService The encryption service to use. Will try to decrypt the message if 
+         * not set to null.
          * @return LoraDTO The received LoRa data.
          */
-        LoraDTO receiveLoraMessage() {
+        LoraDTO receiveLoraMessage(Crypto *cryptoService = nullptr) {
+            // Receive message
             int parsed = LoRa.parsePacket();
             this->logger->logSerial(String(parsed), true);
             String message = LoRa.available() ? LoRa.readString() : "";
+
+            // Decrypt if crypto service ready
+            if (cryptoService != nullptr && cryptoService->isReady()) {
+                message = cryptoService->decrypt(message);
+            } else {
+                this->logger->logSerial("Crypto Service not initialized!", true);
+            }
+
+            // Logging
             if (message.length() > 0) {
                 this->logger->logSerial("Received LoRa Message: " + message, true);
             } else {
