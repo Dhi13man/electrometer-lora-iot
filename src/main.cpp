@@ -21,14 +21,14 @@
 const LoraBand loraBand = LoraBand::ASIA;
 
 // Define Control Mode
-const ControlModes controlMode = ControlModes::GATEWAY;
+const ControlModes controlMode = ControlModes::NODE;
 
 // Wi-Fi Details
 const char* wifiSSID = "Omega_jio2";
 const char* wifiPassword = "55465858";
 
 // Encryption Details
-const char* encryptionKey = "1234567890123456124561212213122";
+const String encryptionKey = "1234567890ABCDEF1234567890ABCDE";
 
 // REST Details
 const String deviceID = "QB5ckYt0CS7Yc7swMKPu";

@@ -75,7 +75,7 @@ class LoraInterface {
 
             // Encrypt if crypto service ready
             if (cryptoService != nullptr && cryptoService->isReady()) {
-                serializedData = cryptoService->decrypt(serializedData);
+                serializedData = cryptoService->encrypt(serializedData);
             } else {
                 this->logger->logSerial("Crypto Service not initialized!", true);
             }
@@ -102,17 +102,19 @@ class LoraInterface {
             this->logger->logSerial(String(parsed), true);
             String message = LoRa.available() ? LoRa.readString() : "";
 
-            // Decrypt if crypto service ready
-            if (cryptoService != nullptr && cryptoService->isReady()) {
-                message = cryptoService->decrypt(message);
-            } else {
-                this->logger->logSerial("Crypto Service not initialized!", true);
-            }
-
             // Logging
             if (message.length() > 0) {
+                // Decrypt if crypto service ready
+                if (cryptoService != nullptr && cryptoService->isReady()) {
+                    message = cryptoService->decrypt(message);
+                } else {
+                    this->logger->logSerial("Crypto Service not initialized!", true);
+                }
                 this->logger->logSerial("Received LoRa Message: " + message, true);
                 this->logger->logOLED("Received " + String(parsed) + " bytes: " + message);
+                if (message.indexOf("=") == -1) {
+                    return LoraDTO(nullptr, 0);
+                }
                 // Deserialize received message
                 return LoraDTO::fromString(message);
             } else {

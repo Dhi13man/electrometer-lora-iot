@@ -33,9 +33,9 @@ class Crypto {
          * @param key The key to use for encryption. If the key is null,
          * the context will not be initialized.
          */
-        void initCtx(const char* key = nullptr) {
-            if (key != nullptr) {
-                AES_init_ctx(ctx, (uint8_t*)key);
+        void initCtx(String key = "") {
+            if (key != nullptr && key != "") {
+                AES_init_ctx_iv(ctx, (uint8_t*)key.c_str(), (uint8_t*)"1234567890ABCDEF1234567890ABCDEF");
                 initialized = true;
             }
         }
@@ -46,7 +46,7 @@ class Crypto {
          * 
          * @param key 
          */
-        Crypto(const char* key) {
+        Crypto(String key="") {
             initialized = false;
             ctx = new AES_ctx();
             initCtx(key);
@@ -60,21 +60,19 @@ class Crypto {
          * @return String The encrypted string.
          * @throws Error if the context is not initialized, i.e. key was never provided to class.
          */
-        String encrypt(String plainText, char* key = nullptr) {
+        String encrypt(String plainText, String key="") {
             initCtx(key);
             // Ensure that encryption context is initialized
             if (!initialized) {
                 throw "Crypto context not initialized";
             }
             // Extract plainText to char*
-            char* plaintext_c = new char[plainText.length() + 1];
-            plainText.toCharArray(plaintext_c, plainText.length() + 1);
+            char textChar[plainText.length() + 1] = {'\0'};
+            plainText.toCharArray(textChar, plainText.length());
             // Encrypt
-            AES_CTR_xcrypt_buffer(ctx, (uint8_t*)plaintext_c, plainText.length());
-            // Remake String and free memory
-            const String out = String(plaintext_c);
-            delete plaintext_c;
-            return out;
+            AES_ECB_encrypt(ctx, (uint8_t*)textChar);
+            // Remake String
+            return String(textChar);
         }
 
         /**
@@ -85,21 +83,19 @@ class Crypto {
          * @return String The decrypted string.
          * @throws Error if the context is not initialized, i.e. key was never provided to class.
          */
-        String decrypt(String cipherText, char* key = nullptr) {
+        String decrypt(String cipherText, String key="") {
             initCtx(key);
             // Ensure that encryption context is initialized
             if (!initialized) {
                 throw "Crypto context not initialized";
             }
             // Extract cipherText to char*
-            char* ciphertext_c = new char[cipherText.length() + 1];
-            cipherText.toCharArray(ciphertext_c, cipherText.length() + 1);
+            char textChar[cipherText.length() + 1] = {'\0'};
+            cipherText.toCharArray(textChar, cipherText.length());
             // Decrypt
-            AES_CTR_xcrypt_buffer(ctx, (uint8_t*)ciphertext_c, cipherText.length());
-            // Remake String and free memory
-            const String out = String(ciphertext_c);
-            delete ciphertext_c;
-            return out;
+            AES_ECB_decrypt(ctx, (uint8_t*)textChar);
+            // Remake String
+            return String(textChar);
         }
 
         /**
