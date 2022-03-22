@@ -31,9 +31,6 @@ class WiFiHandler {
         /// The logger to use for logging.
         Logger *logger;
 
-        /// Secure WiFi Client to make HTTP Requests with.
-        WiFiClientSecure *client;
-
     public:
         /**
          * @brief Construct a new Wi Fi Handler object.
@@ -54,6 +51,7 @@ class WiFiHandler {
          */
         void connectWiFi() {
             WiFi.begin(ssid, password);
+            logger->logOLED("Connecting to " + String(ssid) + "..");
             logger->logSerial("Connecting to " + String(ssid), true);
             while (WiFi.status() != WL_CONNECTED) {
                 delay(1000);
@@ -65,32 +63,26 @@ class WiFiHandler {
         }
 
         /**
-         * @brief Send a GET request to the REST backend.
+         * @brief Create a client and make a request using the HTTP client.
          * 
          * @param host The host to send the request to.
-         * @return String The response from the REST backend.
-         */
-        bool connectClient(String host) {
-            client = new WiFiClientSecure();
-            logger->logSerial("Connecting to " + host, true);
-
-            // Use WiFiClient class to create TCP connections
-            const int httpPort = 443; // 80 is for HTTP / 443 is for HTTPS!
-            client->setInsecure(); // this is the magical line that makes everything work
-            return client->connect(host.c_str(), httpPort);
-        }
-
-        /**
-         * @brief Make a request using the HTTP client.
-         * 
          * @param request The full request to send.
          * @return size_t The size of the response.
          */
-        size_t sendRequest(String request) {
+        size_t sendRequest(String host, String request) {
+            /// Secure WiFi Client to make HTTP Requests with.
+            WiFiClientSecure client = WiFiClientSecure();
+
+            // Use WiFiClient class to create TCP connections
+            const int httpPort = 443; // 80 is for HTTP / 443 is for HTTPS!
+            client.setInsecure(); // this is the magical line that makes everything work
+            logger->logSerial("Connecting to " + host, true);
+            if (!client.connect(host.c_str(), httpPort)) {
+                logger->logSerial("Connection failed!", true);
+                return 0;
+            }
             logger->logSerial("Sending request: " + request, true);
-            size_t out = client->print(request);
-            delete client;
-            return out;
+            return client.print(request);
         }
 
         /**
