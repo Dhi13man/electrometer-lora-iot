@@ -11,7 +11,7 @@
 
 #include "controllers/base_controller.hpp"
 #include "interfaces/lora_interface.hpp"
-#include "interfaces/sensor_interfaces.hpp"
+#include "interfaces/emon_sensors_interface.hpp"
 #include "models/enums.hpp"
 #include "models/lora_dto.hpp"
 #include "services/crypto.hpp"
@@ -26,11 +26,8 @@ class NodeController : public BaseController {
         /// The Device ID of the node.
         String nodeID;
 
-        /// The interface to use the Current sensor.
-        CurrentSensorInterface *currentSensor;
-
-        /// The interface to use the Voltage sensor.
-        VoltageSensorInterface *voltageSensor;
+        /// The interface to use the Electrometer based sensors.
+        EmonSensorsInterface *emonSensorInterface;
 
         /// The interface to use for LoRa Communication (sending)
         LoraInterface *loraInterface;
@@ -48,7 +45,7 @@ class NodeController : public BaseController {
          * @param loraBand The frequency band to be used for LoRA Communication.
          * @param encryptionKey The key to use for encryption of data in communication.
          * @param verbose Whether or not to log the Gatway Controller activities.
-         * @param currentSensorVerbose Whether or not to log the CurrentSensorInterface activities.
+         * @param emonSensorsVerbose Whether or not to log the CurrentSensorInterface activities.
          * @param voltageSensorVerbose Whether or not to log the VoltageSensorInterface activities.
          * @param loraInterfaceVerbose Whether or not to log the LoraInterface activities.
          */
@@ -59,7 +56,7 @@ class NodeController : public BaseController {
             const String encryptionKey,
             const LoraBand loraBand = LoraBand::ASIA,
             const bool verbose = false,
-            const bool currentSensorVerbose = false,
+            const bool emonSensorsVerbose = false,
             const bool voltageSensorVerbose = false,
             const bool loraInterfaceVerbose = false
         ) : BaseController(new Logger(verbose, "NodeController")) {
@@ -67,8 +64,11 @@ class NodeController : public BaseController {
             this->nodeID = nodeID;
 
             // Set up sensor interfaces
-            this->currentSensor = new CurrentSensorInterface(currentSensorPin, currentSensorVerbose);
-            this->voltageSensor = new VoltageSensorInterface(voltageSensorPin, voltageSensorVerbose);
+            this->emonSensorInterface = new EmonSensorsInterface(
+                currentSensorPin, 
+                voltageSensorPin, 
+                emonSensorsVerbose
+            );
 
             // Set up LoRa interface
             this->loraInterface = new LoraInterface(loraBand, loraInterfaceVerbose);
@@ -82,23 +82,14 @@ class NodeController : public BaseController {
          * 
          */
         void operate() {
-            // String enc = cryptoService->encrypt("hehe sexy sex");
-            // String dec = cryptoService->decrypt(enc);
-            // Serial.println("enc: " + enc + "; dec: " + dec);
             // Sense needed values
-            unsigned long last = millis();
-            double cSum = 0, vSum = 0, count = 0;
-            while (int(millis() - last) < 5000) {
-                cSum += currentSensor->getCalibratedValue();
-                vSum += voltageSensor->getCalibratedValue();
-                count += 1;
-                delay(200);
-            }
+            const double iRMS = emonSensorInterface->getRMSCurrent();
+            const double vRMS = emonSensorInterface->getRMSVoltage();
             // For Serializable Data
             SerializableData dataList[] = {
                 SerializableData("deviceID", nodeID),
-                SerializableData("current", String(cSum / count)),
-                SerializableData("voltage", String(vSum / count)),
+                SerializableData("current", String(iRMS)),
+                SerializableData("voltage", String(vRMS)),
             };
             // Send LoRA Message
             LoraDTO dto = LoraDTO(dataList, 3);
@@ -110,10 +101,8 @@ class NodeController : public BaseController {
          * 
          */
         ~NodeController() {
-            delete this->currentSensor;
-            this->currentSensor = nullptr;
-            delete this->voltageSensor;
-            this->voltageSensor = nullptr;
+            delete this->emonSensorInterface;
+            this->emonSensorInterface = nullptr;
             delete this->loraInterface;
             this->loraInterface = nullptr;
             delete this->cryptoService;
