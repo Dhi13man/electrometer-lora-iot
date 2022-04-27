@@ -11,7 +11,7 @@
 
 #include "controllers/base_controller.hpp"
 #include "interfaces/lora_interface.hpp"
-#include "interfaces/emon_sensors_interface.hpp"
+#include "interfaces/power_sensors_interface.hpp"
 #include "models/enums.hpp"
 #include "models/lora_dto.hpp"
 #include "services/crypto.hpp"
@@ -27,7 +27,7 @@ class NodeController : public BaseController {
         String nodeID;
 
         /// The interface to use the Electrometer based sensors.
-        EmonSensorsInterface *emonSensorInterface;
+        PowerSensorsInterface *powerSensorInterface;
 
         /// The interface to use for LoRa Communication (sending)
         LoraInterface *loraInterface;
@@ -45,8 +45,7 @@ class NodeController : public BaseController {
          * @param loraBand The frequency band to be used for LoRA Communication.
          * @param encryptionKey The key to use for encryption of data in communication.
          * @param verbose Whether or not to log the Gatway Controller activities.
-         * @param emonSensorsVerbose Whether or not to log the CurrentSensorInterface activities.
-         * @param voltageSensorVerbose Whether or not to log the VoltageSensorInterface activities.
+         * @param powerSensorsVerbose Whether or not to log the PowerSensorsInterface activities.
          * @param loraInterfaceVerbose Whether or not to log the LoraInterface activities.
          */
         NodeController(
@@ -56,17 +55,16 @@ class NodeController : public BaseController {
             const String encryptionKey,
             const LoraBand loraBand = LoraBand::ASIA,
             const bool verbose = false,
-            const bool emonSensorInterfaceVerbose = false,
-            const bool loraInterfaceVerbose = false
+            const bool powerSensorsVerbose=false,
+            const bool loraInterfaceVerbose=false,
         ) : BaseController(new Logger(verbose, "NodeController")) {
             // Set up device ID
-            this->nodeID = nodeID;
 
             // Set up sensor interfaces
-            this->emonSensorInterface = new EmonSensorsInterface(
+            this->powerSensorInterface = new PowerSensorsInterface(
                 currentSensorPin, 
                 voltageSensorPin, 
-                emonSensorInterfaceVerbose
+                powerSensorsVerbose
             );
 
             // Set up LoRa interface
@@ -82,8 +80,7 @@ class NodeController : public BaseController {
          */
         void operate() {
             // Sense needed values
-            const double iRMS = emonSensorInterface->getRMSCurrent();
-            Serial.println(iRMS);
+            const double iRMS = powerSensorInterface->getRMSCurrent();
             //  const double vRMS = emonSensorInterface->getRMSVoltage();
             // For Serializable Data
             SerializableData dataList[] = {
@@ -101,8 +98,8 @@ class NodeController : public BaseController {
          * 
          */
         ~NodeController() {
-            delete this->emonSensorInterface;
-            this->emonSensorInterface = nullptr;
+            delete this->powerSensorInterface;
+            this->powerSensorInterface = nullptr;
             delete this->loraInterface;
             this->loraInterface = nullptr;
             delete this->cryptoService;
