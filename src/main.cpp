@@ -48,12 +48,11 @@ void setup() {
       controller = new NodeController(
         deviceID,
         36,
-        37,
+        2,
         encryptionKey,
         loraBand,
         false,
-        false,
-        false,
+        true,
         false
       );
       break;

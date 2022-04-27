@@ -45,7 +45,7 @@ class EmonSensorsInterface {
          */
         EmonSensorsInterface(uint8_t currentSensorPin, uint8_t voltageSensorPin, bool verbose = false) {
             emon.current(currentSensorPin, 111.1);
-            emon.voltage(voltageSensorPin, 234.26, 1.7);
+            emon.voltage(2, 234.26, 1.7);
             this->logger = new Logger(verbose, "WiFiHandler");
         }
 

@@ -56,8 +56,7 @@ class NodeController : public BaseController {
             const String encryptionKey,
             const LoraBand loraBand = LoraBand::ASIA,
             const bool verbose = false,
-            const bool emonSensorsVerbose = false,
-            const bool voltageSensorVerbose = false,
+            const bool emonSensorInterfaceVerbose = false,
             const bool loraInterfaceVerbose = false
         ) : BaseController(new Logger(verbose, "NodeController")) {
             // Set up device ID
@@ -67,7 +66,7 @@ class NodeController : public BaseController {
             this->emonSensorInterface = new EmonSensorsInterface(
                 currentSensorPin, 
                 voltageSensorPin, 
-                emonSensorsVerbose
+                emonSensorInterfaceVerbose
             );
 
             // Set up LoRa interface
@@ -84,12 +83,13 @@ class NodeController : public BaseController {
         void operate() {
             // Sense needed values
             const double iRMS = emonSensorInterface->getRMSCurrent();
-            const double vRMS = emonSensorInterface->getRMSVoltage();
+            Serial.println(iRMS);
+            //  const double vRMS = emonSensorInterface->getRMSVoltage();
             // For Serializable Data
             SerializableData dataList[] = {
                 SerializableData("deviceID", nodeID),
                 SerializableData("current", String(iRMS)),
-                SerializableData("voltage", String(vRMS)),
+                SerializableData("voltage", String(244)),
             };
             // Send LoRA Message
             LoraDTO dto = LoraDTO(dataList, 3);
