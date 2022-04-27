@@ -56,7 +56,7 @@ class NodeController : public BaseController {
             const LoraBand loraBand = LoraBand::ASIA,
             const bool verbose = false,
             const bool powerSensorsVerbose=false,
-            const bool loraInterfaceVerbose=false,
+            const bool loraInterfaceVerbose=false
         ) : BaseController(new Logger(verbose, "NodeController")) {
             // Set up device ID
 

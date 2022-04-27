@@ -50,12 +50,12 @@ class PowerSensorsInterface {
          * @param verbose Whether or not to log the interface activities.
          */
         PowerSensorsInterface(
-            uint8_t currentSensorPin, 
-            uint8_t voltageSensorPin, 
-            float slope = 0.0752,
-            float intercept = 0,
-            float testFrequency =50,
-            bool verbose = false
+            const uint8_t currentSensorPin, 
+            const uint8_t voltageSensorPin, 
+            const float slope = 0.0752,
+            const float intercept = 0,
+            const float testFrequency =50,
+            const bool verbose = false
         ) {
             // Set Input Pins
             pinMode(currentSensorPin, INPUT);
@@ -68,7 +68,7 @@ class PowerSensorsInterface {
             this->intercept = intercept;
 
             // Set the window length for the statistics
-            float windowLength = 40.0 / testFrequency;     // How long to average the signal
+            const float windowLength = 40.0 / testFrequency;     // How long to average the signal
             inputStats.setWindowSecs(windowLength);
 
             // Create the logger
@@ -80,10 +80,10 @@ class PowerSensorsInterface {
          * 
          */
         double getRMSCurrent() {
-            uint16_t ACS_Value = analogRead(currentSensorPin);
-            inputStats.input(ACS_Value);  // Log to Stats function
+            const uint16_t analogCurrentSensorValue = analogRead(currentSensorPin);
+            inputStats.input(analogCurrentSensorValue);  // Log to Stats function
                 
-            float out = intercept + slope * inputStats.sigma();
+            const float out = intercept + slope * inputStats.sigma();
             logger->logSerial("Current: " + String(out) + "A", true);
             return out;
         }
