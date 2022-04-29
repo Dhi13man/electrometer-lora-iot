@@ -57,10 +57,10 @@ class GatewayController : public BaseController {
             const char *restHost,
             const String encryptionKey,
             const LoraBand loraBand = LoraBand::ASIA,
-            const bool verbose = false,
-            const bool wifiVerbose = false,
-            const bool restVerbose = false,
-            const bool loraInterfaceVerbose = false
+            bool verbose = false,
+            bool wifiVerbose = false,
+            bool restVerbose = false,
+            bool loraInterfaceVerbose = false
         ) : BaseController(new Logger(verbose, "GatewayController")) {
             // Set up Wi-Fi Connection.
             this->wifi = new WiFiHandler(wifiSSID, wifiPassword, wifiVerbose);
@@ -84,7 +84,7 @@ class GatewayController : public BaseController {
          * 
          */
         void operate() override {
-            LoraDTO dto = loraInterface->receiveLoraMessage(cryptoService);
+            LoraDTO dto = loraInterface->receiveLoraMessage(nullptr);
             if (dto.getDataListSize() == 0) {
                 logger->logSerial("Nothing to send!", true);
             } else {

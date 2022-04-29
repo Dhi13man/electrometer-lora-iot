@@ -47,12 +47,12 @@ void setup() {
     case ControlModes::NODE:
       controller = new NodeController(
         deviceID,
-        36,
+        A0,
         2,
         encryptionKey,
         loraBand,
         false,
-        true,
+        false,
         false
       );
       break;

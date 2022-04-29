@@ -11,6 +11,7 @@
 
 #include<Arduino.h>
 #include <Filters.h>
+#include <EmonLib.h>
 
 #include "services/logger.hpp"
 
@@ -27,7 +28,10 @@ class PowerSensorsInterface {
         uint8_t voltageSensorPin;
 
         /// Create statistics to look at the raw test signal
-        RunningStatistics inputStats; 
+        RunningStatistics inputStats;
+
+        /// Energy monitor approach for measuring
+        EnergyMonitor emon;
 
         /// Calibration Slope to be derived from testing
         float slope;
@@ -50,18 +54,20 @@ class PowerSensorsInterface {
          * @param verbose Whether or not to log the interface activities.
          */
         PowerSensorsInterface(
-            const uint8_t currentSensorPin, 
-            const uint8_t voltageSensorPin, 
-            const float slope = 0.0752,
-            const float intercept = 0,
-            const float testFrequency =50,
-            const bool verbose = false
+            uint8_t currentSensorPin, 
+            uint8_t voltageSensorPin, 
+            float slope = 0.0752,
+            float intercept = 0,
+            float testFrequency = 50,
+            bool verbose = false
         ) {
             // Set Input Pins
             pinMode(currentSensorPin, INPUT);
             this->currentSensorPin = currentSensorPin;
             pinMode(voltageSensorPin, INPUT);
             this->voltageSensorPin = voltageSensorPin;
+            emon.current(currentSensorPin, 1);
+            emon.voltage(voltageSensorPin, 234.26, 1.7);
 
             // Set Calibration Slope and Intercept
             this->slope = slope;
@@ -72,7 +78,19 @@ class PowerSensorsInterface {
             inputStats.setWindowSecs(windowLength);
 
             // Create the logger
-            this->logger = new Logger(verbose, "WiFiHandler");
+            this->logger = new Logger(verbose, "PowerSensors");
+        }
+
+        /**
+         * @brief Get the RMS Current from the Current sensor.
+         * 
+         */
+        double getRMSCurrentEmon() {
+            // emon.calcVI(20,2000);         // Calculate all. No.of half wavelengths (crossings), time-out
+            // emon.serialprint();
+            double result = max(0.0, emon.calcIrms(1480));
+            logger->logSerial("Current: " + String(result) + "A", true);
+            return result;
         }
 
         /**

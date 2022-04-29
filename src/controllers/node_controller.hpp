@@ -49,21 +49,25 @@ class NodeController : public BaseController {
          * @param loraInterfaceVerbose Whether or not to log the LoraInterface activities.
          */
         NodeController(
-            const String nodeID,
-            const uint8_t currentSensorPin,
-            const uint8_t voltageSensorPin,
-            const String encryptionKey,
-            const LoraBand loraBand = LoraBand::ASIA,
-            const bool verbose = false,
-            const bool powerSensorsVerbose=false,
-            const bool loraInterfaceVerbose=false
+            String nodeID,
+            uint8_t currentSensorPin,
+            uint8_t voltageSensorPin,
+            String encryptionKey,
+            LoraBand loraBand = LoraBand::ASIA,
+            bool verbose = false,
+            bool powerSensorsVerbose=false,
+            bool loraInterfaceVerbose=false
         ) : BaseController(new Logger(verbose, "NodeController")) {
             // Set up device ID
-
+            this->nodeID = nodeID;
+            
             // Set up sensor interfaces
             this->powerSensorInterface = new PowerSensorsInterface(
                 currentSensorPin, 
-                voltageSensorPin, 
+                voltageSensorPin,
+                0.0052,
+                0,
+                50,
                 powerSensorsVerbose
             );
 
@@ -80,7 +84,7 @@ class NodeController : public BaseController {
          */
         void operate() {
             // Sense needed values
-            const double iRMS = powerSensorInterface->getRMSCurrent();
+            const double iRMS = powerSensorInterface->getRMSCurrentEmon();
             //  const double vRMS = emonSensorInterface->getRMSVoltage();
             // For Serializable Data
             SerializableData dataList[] = {
@@ -90,7 +94,7 @@ class NodeController : public BaseController {
             };
             // Send LoRA Message
             LoraDTO dto = LoraDTO(dataList, 3);
-            loraInterface->sendLoraMessage(dto, cryptoService);
+            loraInterface->sendLoraMessage(dto, nullptr);
         }
 
         /**
